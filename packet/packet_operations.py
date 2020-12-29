@@ -15,7 +15,7 @@ class SubmarinePacket:
     BIG_ENDIAN = 'big'
 
     @staticmethod
-    def build_packet(message: str, length_endian_type: str) -> str:
+    def struct_packet(message: str, length_endian_type: str) -> str:
         """
         build a packet structure with the message content and endian format for the message length
         :param message: the message content
@@ -37,3 +37,13 @@ class SubmarinePacket:
         message_size_bytes = message_size.to_bytes(SubmarinePacket.MESSAGE_LENGTH_SIZE, endian_type)
         message_size_ascii = [chr(byte) for byte in message_size_bytes]
         return ''.join(message_size_ascii)
+
+    @staticmethod
+    def convert_ascii_to_size(received_message_size: str, endian_type: str) -> int:
+        """
+        convert message size from received packet to integer
+        :param received_message_size: the message size received from the other player
+        :param endian_type: the endian type of the length representation
+        :return: the message size in integer type
+        """
+        return int.from_bytes(bytes(received_message_size, 'ascii'), endian_type)
