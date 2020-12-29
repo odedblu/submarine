@@ -11,39 +11,35 @@ class SubmarinePacket:
     class for operation to create or the analyze Submarine packets.
     """
     MESSAGE_LENGTH_SIZE = 3
-    LITTLE_ENDIAN = 'little'
-    BIG_ENDIAN = 'big'
 
     @staticmethod
-    def struct_packet(message: str, length_endian_type: str) -> str:
+    def struct_packet(message: str) -> str:
         """
         build a packet structure with the message content and endian format for the message length
         :param message: the message content
-        :param length_endian_type: the endian format the length of the message will be format
         :return: str that represent the concatenation of the message length and the message content
         """
-        message_size = len(message)
-        message_size_ascii = SubmarinePacket.convert_size_to_endian(message_size, length_endian_type)
-        return message_size_ascii + message
+        return SubmarinePacket.get_packet_size_three_chars(len(message)) + message
 
     @staticmethod
-    def convert_size_to_endian(message_size: int, endian_type: str) -> str:
+    def get_packet_size_three_chars(message_size: int) -> str:
         """
-        convert length to ascii chars that represent the message size
-        :param message_size: the length of the message content
-        :param endian_type: type of endian we represent the message_size
-        :return: the MESSAGE_LENGTH_SIZE size ascii string
+        gett the message size string to append to message
+        :param message_size: the message data size
+        :return: string of length MESSAGE_LENGTH_SIZE that represents the data size
         """
-        message_size_bytes = message_size.to_bytes(SubmarinePacket.MESSAGE_LENGTH_SIZE, endian_type)
-        message_size_ascii = [chr(byte) for byte in message_size_bytes]
-        return ''.join(message_size_ascii)
+        if message_size > 999:
+            return '999'
+        result = str(message_size)
+        while len(result) != SubmarinePacket.MESSAGE_LENGTH_SIZE:
+            result = f'0{result}'
+        return result
 
     @staticmethod
-    def convert_ascii_to_size(received_message_size: str, endian_type: str) -> int:
+    def get_received_packet_size(received_packet_size: str) -> int:
         """
-        convert message size from received packet to integer
-        :param received_message_size: the message size received from the other player
-        :param endian_type: the endian type of the length representation
-        :return: the message size in integer type
+        convert the MESSAGE_LENGTH_SIZE first chars to integer
+        :param received_packet_size: the MESSAGE_LENGTH_SIZE first chars of received packet
+        :return: the length of the packet data
         """
-        return int.from_bytes(bytes(received_message_size, 'ascii'), endian_type)
+        return int(received_packet_size)
